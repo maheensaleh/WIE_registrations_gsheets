@@ -4,6 +4,7 @@ import oauth2client
 from oauth2client.service_account import ServiceAccountCredentials
 import cv2
 import numpy as np
+import pytesseract
 
 # scope = ['https://spreadsheets.google.com/feeds']
 scope = ['https://spreadsheets.google.com/feeds',
@@ -56,10 +57,9 @@ def data_view(request):
     cv2.waitKey(0)
 
     MIN = 10
-    img1 = cv2.imread('m6.jpg', 0)
+    img1 = cv2.imread('m.jpg', 0)
 
     video = cv2.VideoCapture(0)
-
     while True:
         _, img2 = video.read()  # img2 = cv2.imread('m3.jpg', 0)
         sift = cv2.xfeatures2d.SIFT_create()
@@ -88,10 +88,10 @@ def data_view(request):
             img2 = cv2.polylines(img2, [np.int32(dst)], True, (255), 3, cv2.LINE_AA)
             print("*********CARD MATCHED*********")
         else:
-
             print("Not enough matches are found - %d/%d" %
                   (len(good), MIN))
             matchesMask = None
+            break
         draw_params = dict(matchColor=(0, 255, 0),
                            singlePointColor=None,
                            matchesMask=matchesMask,
@@ -99,8 +99,8 @@ def data_view(request):
         img3 = cv2.drawMatches(img1, kp1, img2, kp2, good, None, **draw_params)
         # plt.imshow(img3, 'gray'), plt.show()
         # print(dst)
+
         approx = np.int32(dst)
-        break
         # print(approx)
 
         # approxx=mapp(approx) #find endpoints of the sheet
@@ -141,15 +141,18 @@ def data_view(request):
 
     # cv2.imshow("Enrollment",Enrol)
     # cv2.waitKey(0)
-    import pytesseract
 
     text = pytesseract.image_to_string(crop)
     text1 = pytesseract.image_to_string(Depart)
 
+    detection = False
+    if text !='' or text1 != '':
+        detection=True
+
     print("NAME: ", text)
     print(text1)
 
-    data = { "text1 ":text, "text2":text1}
+    data = { "text1 ":text, "text2":text1,'detection':detection}
     return render(request,"data_view.html",data)
 
 
