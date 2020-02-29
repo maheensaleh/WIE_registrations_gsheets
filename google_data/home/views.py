@@ -15,42 +15,10 @@ client = gspread.authorize(creds)
 
 sheet = client.open('sample').sheet1
 
-data = sheet.get_all_records()
-# print(data)
-
-
 # Create your views here.
 
 def base(request):
     return render(request,"base.html")
-
-# def filter(request):
-#     domain = request.GET.get('domain', '')
-#     param = {'domain': domain}
-#
-#     return render(request,"filter.html",param)
-
-# def data_view(request):
-#         phone = ''
-#         roll_no = ''
-#         year = ''
-#         domain= ''
-#
-#         student_name = request.GET.get('student_name', '')
-#
-#         for i in data:
-#             if i['name'] == student_name:
-#                 phone = i['phone']
-#                 roll_no = i['roll_no']
-#                 year = i['year']
-#                 domain = i['domain']
-#
-#         for i in [phone,roll_no,year,domain]:
-#             if i=='':
-#                 i = 'No data found'
-#
-#         dictionary = {"student_name": student_name,'phone':phone,'roll_no':roll_no,'year':year,'domain':domain}
-#         return render(request, "data_view.html", dictionary)
 
 
 def data_view(request):
@@ -151,14 +119,32 @@ def data_view(request):
     text = pytesseract.image_to_string(crop)
     text1 = pytesseract.image_to_string(Depart)
 
-    if text !='' or text1 != '':
+    if text !='' :
         detection=True
 
     print("NAME: ", text)
     print(text1)
 
-    data = { "text1 ":text, "text2":text1,'detection':detection}
-    return render(request,"data_view.html",data)
+    ## accessing google sheet ##
+    phone,roll_no,year ,domain= '','','',''
+
+    student_name = text
+
+    data = sheet.get_all_records()
+    for i in data:
+        if i['name'] == student_name:
+            phone = i['phone']
+            roll_no = i['roll_no']
+            year = i['year']
+            domain = i['domain']
+
+    for i in [phone,roll_no,year,domain]:
+        if i=='':
+            i = 'No data found'
+
+    dictionary = {"student_name": student_name,'phone':phone,'roll_no':roll_no,'year':year,'domain':domain,'detection':detection}
+
+    return render(request,"data_view.html",dictionary)
 
 
 
