@@ -54,11 +54,11 @@ def base(request):
 
 
 def data_view(request):
-    cv2.waitKey(0)
 
     MIN = 10
     img1 = cv2.imread('m.jpg', 0)
-
+    text, text1 = '' ,''
+    detection = False
     video = cv2.VideoCapture(0)
     while True:
         _, img2 = video.read()  # img2 = cv2.imread('m3.jpg', 0)
@@ -100,7 +100,13 @@ def data_view(request):
         # plt.imshow(img3, 'gray'), plt.show()
         # print(dst)
 
-        approx = np.int32(dst)
+
+        try:
+            approx = np.int32(dst)
+        except:
+            data = {"text1 ": text, "text2": text1, 'detection': detection}
+            return render(request, "data_view.html", data)
+
         # print(approx)
 
         # approxx=mapp(approx) #find endpoints of the sheet
@@ -145,7 +151,6 @@ def data_view(request):
     text = pytesseract.image_to_string(crop)
     text1 = pytesseract.image_to_string(Depart)
 
-    detection = False
     if text !='' or text1 != '':
         detection=True
 
