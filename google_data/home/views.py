@@ -18,18 +18,36 @@ data = sheet.get_all_records()
 
 # Create your views here.
 
-def home(request):
-    return render(request,"home.html")
+def base(request):
+    return render(request,"base.html")
+
+
+def filter(request):
+    domain = request.GET.get('domain', '')
+    param = {'domain': domain}
+
+    return render(request,"filter.html",param)
 
 def data_view(request):
+        phone = ''
+        roll_no = ''
+        year = ''
+        domain= ''
 
         student_name = request.GET.get('student_name', '')
 
         for i in data:
             if i['name'] == student_name:
                 phone = i['phone']
+                roll_no = i['roll_no']
+                year = i['year']
+                domain = i['domain']
 
-        dictionary = {"student_name": student_name,'phone':phone}
+        for i in [phone,roll_no,year,domain]:
+            if i=='':
+                i = 'No data found'
+
+        dictionary = {"student_name": student_name,'phone':phone,'roll_no':roll_no,'year':year,'domain':domain}
         return render(request, "data_view.html", dictionary)
 
 
