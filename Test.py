@@ -28,7 +28,7 @@ print(cv2.__version__)
 
 MIN = 10
 img1 = cv2.imread('m2.jpg',0)
-img2 = cv2.imread('m3.jpg',0)
+img2 = cv2.imread('m3',0)
 sift = cv2.xfeatures2d.SIFT_create()
 kp1, des1 = sift.detectAndCompute(img1,None)
 kp2, des2 = sift.detectAndCompute(img2,None)
@@ -124,9 +124,9 @@ text2 = pytesseract.image_to_string(Enrol)
 import gspread
 from oauth2client.service_account import ServiceAccountCredentials
 scope =['https://spreadsheets.google.com/feeds','https://www.googleapis.com/auth/drive']
-credentials = ServiceAccountCredentials.from_json_keyfile_name('sevice_credentials.json',scope)
+credentials = ServiceAccountCredentials.from_json_keyfile_name('IEEEWIE-9ea42a36af92.json',scope)
 gc=gspread.authorize(credentials)
-wks = gc.open('Attendance').sheet1
+wks = gc.open('IDCardInfo').sheet1
 wks.append_row([text, text1  ] )
 
 
