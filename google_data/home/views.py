@@ -125,6 +125,7 @@ def data_view(request):
     print("NAME: ", text)
     print(text1)
 
+    ## accessing google shee
     ## accessing google sheet ##
     phone,roll_no,year ,domain= '','','',''
 
