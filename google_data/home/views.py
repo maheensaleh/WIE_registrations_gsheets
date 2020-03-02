@@ -66,6 +66,13 @@ def data_view(request):
 
             if m.distance < 0.7 * n.distance:
                 good.append(m)
+
+        cv2.imshow('pic', img2)
+        if cv2.waitKey(1) & 0xFF == ord('q'):
+            video.release()
+            cv2.destroyAllWindows()
+            break
+
         if len(good) > MIN:
 
             src_pts = np.float32([kp1[m.queryIdx].pt for m in good]).reshape(-1, 1, 2)
