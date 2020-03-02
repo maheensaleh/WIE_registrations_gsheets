@@ -51,6 +51,7 @@ def data_view(request):
     text, text1 = '' ,''
     detection = False
     video = cv2.VideoCapture(0)
+    print("repeating")
     while True:
         _, img2 = video.read()  # img2 = cv2.imread('m3.jpg', 0)
         sift = cv2.xfeatures2d.SIFT_create()
@@ -89,7 +90,6 @@ def data_view(request):
             print("Not enough matches are found - %d/%d" %
                   (len(good), MIN))
             matchesMask = None
-            break
         draw_params = dict(matchColor=(0, 255, 0),
                            singlePointColor=None,
                            matchesMask=matchesMask,
@@ -99,11 +99,11 @@ def data_view(request):
         # print(dst)
 
 
-        try:
-            approx = np.int32(dst)
-        except:
-            data = {"text1 ": text, "text2": text1, 'detection': detection}
-            return render(request, "data_view.html", data)
+    try:
+        approx = np.int32(dst)
+    except:
+        data = {"text1 ": text, "text2": text1, 'detection': detection}
+        return render(request, "data_view.html", data)
 
         # print(approx)
 
@@ -148,7 +148,7 @@ def data_view(request):
 
     text = pytesseract.image_to_string(crop)
     text1 = pytesseract.image_to_string(Depart)
-
+    text='dkn'
     if text !='' :
         detection=True
 
