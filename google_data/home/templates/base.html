@@ -1,109 +1,10 @@
-<!doctype html>
-<html lang="en">
-  <head>
-    <!-- Required meta tags -->
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 
-    <!-- Bootstrap CSS -->
-    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css" integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
+{%  extends "index.html" %}
 
-    <title>IEEE-WIE</title>
-  </head>
+{% block content%}
 
+{% load static %}
 
-  <style>
-
-  *{font-family:Verdana,Geneva, sans-serif}
-
-  #heading{
-  width:500px;
-  height:350px;
-  padding : 10px;
-  padding-top:20px;
-  border: 2px solid white;
-  border-radius: 10px;
-  background-color : rgba(0,0,0,0.5)
-  }
-
-    #mainheading{
-    color:white ;font-weight:bold
-
-    }
-
-    #headnav { background-color:#641c85; height:130px }
-
-    .load{
-      animation :slide 2s;
-    }
-
-   .slider{
-    background-repeat :no-repeat;
-    background-size:cover;
-    background-position:center;
-    width :100%;
-    height :100vh;
-    animation :slide 20s infinite;
-    position:absolute
-   }
-
-   .content{
-     width : 100%;
-     height:100%
-   }
-
-   .principal{
-    left :45%;
-    top:40%;
-    transform : translate(-40%,-50%);
-    position :absolute;
-}
-
-@keyframes slide{
-
-
-    0%{ background-image:url('img1.webp');}
-    20%{background-image:url('img1.webp');}
-    20.01%{background-image:url('img2.jpeg');}
-    40%{background-image:url('img2.jpeg');}
-    40.01%{background-image:url('img1.webp');}
-    60%{background-image:url('img1.webp');}
-    60.01%{background-image:url('img2.jpeg');}
-    80%{background-image:url('img2.jpeg');}
-    80.01%{background-image:url('img1.webp');}
-    100%{background-image:url('img1.webp');}
-}
-
-
-  </style>
-
-  <body >
-
-        <nav id="headnav">
-            <div style="padding:10px">
-
-                <img align="left" src="https://wie.ieee.org/wp-content/uploads/2018/02/wie-logo@2x.png"
-            width="140" title="IEEE Women in Engineering" alt="IEEE Women in Engineering">
-
-
-            <img style="margin:10px ; padding-top:15px" src="https://wie.ieee.org/wp-content/uploads/2018/02/ieee-logo@2x.png"
-            width="150" alt="IEEE" title="IEEE" align="right">
-
-                <div style="padding:2%" ><h2 id="mainheading" align="center" >INTERVIEW REGISTRATION DETAILS</h2></div>
-            </div>
-
-        </nav>
-
-    <div style="background-color:white ;width:100%;height:5px  "></div>
-
-
-<div class="slider">
-  <div  class="load">
-  </div>
-  <div class="content">
-    <div class="principal">
-
-          <div id="heading">
           <h2  align = "center" style="color:white">Show ID card to start detection</h2>
 
           <div align="center" style="padding:10px"><a href="data_view">
@@ -114,20 +15,14 @@
 
 
 
-<form action="" method="get">
-    <h2  align = "center" style="color:white">Enter student's name</h2>
+        <form action="data_view" method="get">
+            <h2  align = "center" style="color:white">Enter student's name</h2>
 
-    <div align="center"><input type="text" size="20" name="comment"></div>
-    <div align="center" style=" padding-top:15px" ><input style="font-size:20px" type="submit" class="btn btn-success" value="Proceed"></div>
-</form>
+            <div align="center"><input type="text" size="20" name="student_name"></div>
+            <div align="center" style=" padding-top:15px" ><input style="font-size:20px" type="submit" class="btn btn-success" value="Proceed"></div>
+        </form>
 
-          </div>
-
-    </div>
-  </div>
-</div>
-
-
+{% endblock content %}
 
 
 

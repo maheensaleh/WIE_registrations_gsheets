@@ -23,6 +23,29 @@ def base(request):
 
 def data_view(request):
 
+    student_name = request.GET.get('student_name', '')
+    detection = False
+
+    if student_name!='':
+        phone, roll_no, year, domain = '', '', '', ''
+        data = sheet.get_all_records()
+        for i in data:
+            if i['name'] == student_name:
+                detection = True
+                phone = i['phone']
+                roll_no = i['roll_no']
+                year = i['year']
+                domain = i['domain']
+
+        for i in [phone, roll_no, year, domain]:
+            if i == '':
+                i = 'No data found'
+
+        dictionary = {"student_name": student_name, 'phone': phone, 'roll_no': roll_no, 'year': year, 'domain': domain,
+                      'detection': detection}
+
+        return render(request, "data_view.html", dictionary)
+
     MIN = 10
     img1 = cv2.imread('m.jpg', 0)
     text, text1 = '' ,''
