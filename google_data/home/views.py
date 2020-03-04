@@ -53,7 +53,8 @@ def data_view(request):
     video = cv2.VideoCapture(0)
     print("repeating")
     while True:
-        _, img2 = video.read()  # img2 = cv2.imread('m3.jpg', 0)
+        _, img2 = video.read()
+        # img2 = cv2.imread('m.jpg', 0)
         sift = cv2.xfeatures2d.SIFT_create()
         kp1, des1 = sift.detectAndCompute(img1, None)
         kp2, des2 = sift.detectAndCompute(img2, None)
@@ -79,22 +80,22 @@ def data_view(request):
             src_pts = np.float32([kp1[m.queryIdx].pt for m in good]).reshape(-1, 1, 2)
             dst_pts = np.float32([kp2[m.trainIdx].pt for m in good]).reshape(-1, 1, 2)
             M, mask = cv2.findHomography(src_pts, dst_pts, cv2.RANSAC, 5.0)
-            matchesMask = mask.ravel().tolist()
+            # matchesMask = mask.ravel().tolist()
             h, w = img1.shape
             pts = np.float32([[0, 0], [0, h - 1], [w - 1, h - 1], [w - 1, 0]]).reshape(-1, 1, 2)
             dst = cv2.perspectiveTransform(pts, M)
 
-            img2 = cv2.polylines(img2, [np.int32(dst)], True, (255), 3, cv2.LINE_AA)
+            # img2 = cv2.polylines(img2, [np.int32(dst)], True, (255), 3, cv2.LINE_AA)
             print("*********CARD MATCHED*********")
         else:
             print("Not enough matches are found - %d/%d" %
                   (len(good), MIN))
-            matchesMask = None
-        draw_params = dict(matchColor=(0, 255, 0),
-                           singlePointColor=None,
-                           matchesMask=matchesMask,
-                           flags=2)
-        img3 = cv2.drawMatches(img1, kp1, img2, kp2, good, None, **draw_params)
+            # matchesMask = None
+        # draw_params = dict(matchColor=(0, 255, 0),
+        #                    singlePointColor=None,
+        #                    matchesMask=matchesMask,
+        #                    flags=2)
+        # img3 = cv2.drawMatches(img1, kp1, img2, kp2, good, None, **draw_params)
         # plt.imshow(img3, 'gray'), plt.show()
         # print(dst)
 
@@ -127,39 +128,41 @@ def data_view(request):
     x = 148
     w = 489
     h = 73
-    crop = dst[y:y + h, x:x + w]
+    crop1 = dst[y:y + h, x:x + w]
     # cv2.imshow("cropped", crop)
     # cv2.waitKey(0)
     x = 152
     y = 424
     w = 489
     h = 66
-    Depart = dst[y:y + h, x:x + w]
+    crop2 = dst[y:y + h, x:x + w]
     # cv2.imshow("Department" , Depart )
     # cv2.waitKey(0)
     x = 276
     y = 713
     w = 117
     h = 32
-    Enrol = dst[y:y + h, x:x + w]
+    crop3 = dst[y:y + h, x:x + w]
 
     # cv2.imshow("Enrollment",Enrol)
     # cv2.waitKey(0)
 
-    text = pytesseract.image_to_string(crop)
-    text1 = pytesseract.image_to_string(Depart)
-    text='dkn'
-    if text !='' :
+    text1 = pytesseract.image_to_string(crop1)
+    text2 = pytesseract.image_to_string(crop2)
+    text3 = pytesseract.image_to_string(crop3)
+
+    if text1 !='' :
         detection=True
 
-    print("NAME: ", text)
-    print(text1)
+    print("text1: ", text1)
+    print("text2: ", text2)
+    print("text3: ", text3)
 
     ## accessing google shee
     ## accessing google sheet ##
     phone,roll_no,year ,domain= '','','',''
 
-    student_name = text
+    student_name = text1
 
     data = sheet.get_all_records()
     for i in data:
