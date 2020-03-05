@@ -1,101 +1,86 @@
+#imports
 import cv2
 import numpy as np
 import pytesseract
 import gspread
 import oauth2client
 from oauth2client.service_account import ServiceAccountCredentials
-scope = ['https://spreadsheets.google.com/feeds',
-         'https://www.googleapis.com/auth/drive']
 
-creds = ServiceAccountCredentials.from_json_keyfile_name('IEEEWIE-9ea42a36af92.json', scope)
-client = gspread.authorize(creds)
+# ## accessing google_sheet
+# scope = ['https://spreadsheets.google.com/feeds',
+#          'https://www.googleapis.com/auth/drive']
+# creds = ServiceAccountCredentials.from_json_keyfile_name('IEEEWIE-9ea42a36af92.json', scope)
+# client = gspread.authorize(creds)
+# sheet = client.open('sample').sheet1
 
-sheet = client.open('sample').sheet1
-
-
-
-detection = False
 def click_event(event, x, y, flags, param):
     if event == cv2.EVENT_LBUTTONDOWN:
         print(x,', ' ,y)
-        # font = cv2.FONT_HERSHEY_SIMPLEX
-        # strXY = str(x) + ', '+ str(y)
-        # cv2.putText(img, strXY, (x, y), font, .5, (255, 255, 0), 2)
-        # cv2.imshow('image', img)
 
-
-
+#detection variables
+detection = False
 MIN = 10
 img1 = cv2.imread('m.jpg', 0)
-name, depart = '' ,''
-detection = False
 video = cv2.VideoCapture(0)
-print("repeating")
+pic_taken = False
 while True:
-    # _, img2 = video.read()
-    img2 = cv2.imread('maryum2.jpeg', 0)
-    sift = cv2.xfeatures2d.SIFT_create()
-    kp1, des1 = sift.detectAndCompute(img1, None)
-    kp2, des2 = sift.detectAndCompute(img2, None)
-    FLANN_INDEX_KDTREE = 0
-    index_params = dict(algorithm=FLANN_INDEX_KDTREE, trees=5)
-    search_params = dict(checks=50)
-    flann = cv2.FlannBasedMatcher(index_params, search_params)
-    matches = flann.knnMatch(des1, des2, k=2)
-    good = []
-    for m, n in matches:
+    _,screen = video.read()
+    cv2.imshow('pic', screen)
 
-        if m.distance < 0.7 * n.distance:
-            good.append(m)
+    if pic_taken:
+        if cv2.waitKey(1) & 0xFF == ord('q'):
+            video.release()
+            cv2.destroyAllWindows()
+            break
 
-    cv2.imshow('pic', img2)
-    cv2.setMouseCallback('pic', click_event)
+    if not pic_taken:
+        if cv2.waitKey(1) & 0xFF == ord('t'):
+            pic_taken = True
+            # _, img2 = video.read()
+            img2 = screen
+            print("pic captured")
+            # img2 = cv2.imread('al.jpeg', 0)
+            pic_taken = True
+            sift = cv2.xfeatures2d.SIFT_create()
+            kp1, des1 = sift.detectAndCompute(img1, None)
+            kp2, des2 = sift.detectAndCompute(img2, None)
+            FLANN_INDEX_KDTREE = 0
+            index_params = dict(algorithm=FLANN_INDEX_KDTREE, trees=5)
+            search_params = dict(checks=50)
+            flann = cv2.FlannBasedMatcher(index_params, search_params)
+            matches = flann.knnMatch(des1, des2, k=2)
+            good = []
+            for m, n in matches:
 
-    if cv2.waitKey(1) & 0xFF == ord('q'):
-        video.release()
-        cv2.destroyAllWindows()
-        break
-
-    if len(good) > MIN:
-
-        src_pts = np.float32([kp1[m.queryIdx].pt for m in good]).reshape(-1, 1, 2)
-        dst_pts = np.float32([kp2[m.trainIdx].pt for m in good]).reshape(-1, 1, 2)
-        M, mask = cv2.findHomography(src_pts, dst_pts, cv2.RANSAC, 5.0)
-        # matchesMask = mask.ravel().tolist()
-        h, w = img1.shape
-        pts = np.float32([[0, 0], [0, h - 1], [w - 1, h - 1], [w - 1, 0]]).reshape(-1, 1, 2)
-        dst = cv2.perspectiveTransform(pts, M)
-
-        # img2 = cv2.polylines(img2, [np.int32(dst)], True, (255), 3, cv2.LINE_AA)
-        print("*********CARD MATCHED*********")
-    else:
-        print("Not enough matches are found - %d/%d" %
-              (len(good), MIN))
-        # matchesMask = None
-    # draw_params = dict(matchColor=(0, 255, 0),
-    #                    singlePointColor=None,
-    #                    matchesMask=matchesMask,
-    #                    flags=2)
-    # img3 = cv2.drawMatches(img1, kp1, img2, kp2, good, None, **draw_params)
-    # plt.imshow(img3, 'gray'), plt.show()
-    # print(dst)
+                if m.distance < 0.7 * n.distance:
+                    good.append(m)
 
 
-try:
-    approx = np.int32(dst)
-except:
-    pass
+            if len(good) > MIN:
 
+                src_pts = np.float32([kp1[m.queryIdx].pt for m in good]).reshape(-1, 1, 2)
+                dst_pts = np.float32([kp2[m.trainIdx].pt for m in good]).reshape(-1, 1, 2)
+                M, mask = cv2.findHomography(src_pts, dst_pts, cv2.RANSAC, 5.0)
+                h, w = img1.shape
+                pts = np.float32([[0, 0], [0, h - 1], [w - 1, h - 1], [w - 1, 0]]).reshape(-1, 1, 2)
+                dst = cv2.perspectiveTransform(pts, M)
+                print("*********CARD MATCHED*********")
+            else:
+                print("Not enough matches are found - %d/%d" ,len(good), MIN)
 
-    # print(approx)
+        # cv2.imshow('pic', img2)
+        # cv2.setMouseCallback('pic', click_event)
+        # if cv2.waitKey(1) & 0xFF == ord('q'):
+        #     video.release()
+        #     cv2.destroyAllWindows()
+        #     break
 
-    # approxx=mapp(approx) #find endpoints of the sheet
+    # approx = np.int32(dst)
 
-    # pts=np.float32([[0,0],[800,0],[800,800],[0,800]])  #map to 800*800 target window
-
-    # op=cv2.getPerspectiveTransform(approxx,pts)  #get the top or bird eye view effect
-    # dst=cv2.warpPerspective(orig,op,(800,800))
-    # print(target)
+            try:
+                approx = np.int32(dst)
+            except:
+                pass
 
 pts1 = np.float32([approx[0], approx[3], approx[1], approx[2]])
 pts2 = np.float32([[0, 0], [800, 0], [0, 800], [800, 800]])
@@ -149,14 +134,16 @@ if cv2.waitKey(0) & 0xFF == ord('q'):
 
 
 x = 160
-y=500
+y=504
 w = 310
-h = 33
+h = 34
 roll_no_crop = dst[y:y + h, x:x + w]
 
 cv2.imshow("roll_no", roll_no_crop)
 if cv2.waitKey(0) & 0xFF == ord('q'):
     cv2.destroyAllWindows()
+
+name = ''
 
 name = pytesseract.image_to_string(name_crop)
 depart = pytesseract.image_to_string(depart_crop)
