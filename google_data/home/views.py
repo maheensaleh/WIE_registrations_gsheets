@@ -6,23 +6,26 @@ import cv2
 import numpy as np
 import pytesseract
 
-# scope = ['https://spreadsheets.google.com/feeds']
+
+# accessing google sheets
 scope = ['https://spreadsheets.google.com/feeds',
          'https://www.googleapis.com/auth/drive']
-
 creds = ServiceAccountCredentials.from_json_keyfile_name('IEEEWIE-9ea42a36af92.json', scope)
 client = gspread.authorize(creds)
-
 sheet = client.open('sample').sheet1
 
 # Create your views here.
-
 def base(request):
     return render(request,"base.html")
+
+def crop(dst,x,y,w,h):
+    return dst[y:y + h, x:x + w]
 
 
 def data_view(request):
 
+    ## if student name given in text box----------------
+    # ------------------------------------------------------------------
     student_name = request.GET.get('student_name', '')
     detection = False
 
@@ -45,139 +48,103 @@ def data_view(request):
                       'detection': detection}
 
         return render(request, "data_view.html", dictionary)
+    # ------------------------------------------------------------------
+    # ------------------------------------------------------------------
 
+    # do detection
     MIN = 10
     img1 = cv2.imread('m.jpg', 0)
-    text, text1 = '' ,''
     detection = False
     video = cv2.VideoCapture(0)
-    print("repeating")
+    pic_taken = False
+    name = ''
+
     while True:
-        _, img2 = video.read()
-        # img2 = cv2.imread('m.jpg', 0)
-        sift = cv2.xfeatures2d.SIFT_create()
-        kp1, des1 = sift.detectAndCompute(img1, None)
-        kp2, des2 = sift.detectAndCompute(img2, None)
-        FLANN_INDEX_KDTREE = 0
-        index_params = dict(algorithm=FLANN_INDEX_KDTREE, trees=5)
-        search_params = dict(checks=50)
-        flann = cv2.FlannBasedMatcher(index_params, search_params)
-        matches = flann.knnMatch(des1, des2, k=2)
-        good = []
-        for m, n in matches:
+        _, screen = video.read()
+        cv2.imshow('pic', screen)
 
-            if m.distance < 0.7 * n.distance:
-                good.append(m)
+        if pic_taken:
+            if cv2.waitKey(1) & 0xFF == ord('q'):
+                video.release()
+                cv2.destroyAllWindows()
+                break
 
-        cv2.imshow('pic', img2)
-        if cv2.waitKey(1) & 0xFF == ord('q'):
-            video.release()
-            cv2.destroyAllWindows()
-            break
+        if not pic_taken:
+            if cv2.waitKey(1) & 0xFF == ord('t'):
+                pic_taken = True
+                # _, img2 = video.read()
+                img2 = screen
+                print("pic captured")
+                # img2 = cv2.imread('al.jpeg', 0)
+                pic_taken = True
+                sift = cv2.xfeatures2d.SIFT_create()
+                kp1, des1 = sift.detectAndCompute(img1, None)
+                kp2, des2 = sift.detectAndCompute(img2, None)
+                FLANN_INDEX_KDTREE = 0
+                index_params = dict(algorithm=FLANN_INDEX_KDTREE, trees=5)
+                search_params = dict(checks=50)
+                flann = cv2.FlannBasedMatcher(index_params, search_params)
+                matches = flann.knnMatch(des1, des2, k=2)
+                good = []
+                for m, n in matches:
 
-        if len(good) > MIN:
+                    if m.distance < 0.7 * n.distance:
+                        good.append(m)
 
-            src_pts = np.float32([kp1[m.queryIdx].pt for m in good]).reshape(-1, 1, 2)
-            dst_pts = np.float32([kp2[m.trainIdx].pt for m in good]).reshape(-1, 1, 2)
-            M, mask = cv2.findHomography(src_pts, dst_pts, cv2.RANSAC, 5.0)
-            # matchesMask = mask.ravel().tolist()
-            h, w = img1.shape
-            pts = np.float32([[0, 0], [0, h - 1], [w - 1, h - 1], [w - 1, 0]]).reshape(-1, 1, 2)
-            dst = cv2.perspectiveTransform(pts, M)
+                if len(good) > MIN:
 
-            # img2 = cv2.polylines(img2, [np.int32(dst)], True, (255), 3, cv2.LINE_AA)
-            print("*********CARD MATCHED*********")
-        else:
-            print("Not enough matches are found - %d/%d" %
-                  (len(good), MIN))
-            # matchesMask = None
-        # draw_params = dict(matchColor=(0, 255, 0),
-        #                    singlePointColor=None,
-        #                    matchesMask=matchesMask,
-        #                    flags=2)
-        # img3 = cv2.drawMatches(img1, kp1, img2, kp2, good, None, **draw_params)
-        # plt.imshow(img3, 'gray'), plt.show()
-        # print(dst)
-
-
+                    src_pts = np.float32([kp1[m.queryIdx].pt for m in good]).reshape(-1, 1, 2)
+                    dst_pts = np.float32([kp2[m.trainIdx].pt for m in good]).reshape(-1, 1, 2)
+                    M, mask = cv2.findHomography(src_pts, dst_pts, cv2.RANSAC, 5.0)
+                    h, w = img1.shape
+                    pts = np.float32([[0, 0], [0, h - 1], [w - 1, h - 1], [w - 1, 0]]).reshape(-1, 1, 2)
+                    dst = cv2.perspectiveTransform(pts, M)
+                    print("*********CARD MATCHED*********")
+                else:
+                    print("Not enough matches are found - %d/%d", len(good), MIN)
+                try:
+                    approx = np.int32(dst)
+                except:
+                    pass
     try:
-        approx = np.int32(dst)
+        pts1 = np.float32([approx[0], approx[3], approx[1], approx[2]])
+        pts2 = np.float32([[0, 0], [800, 0], [0, 800], [800, 800]])
+        op = cv2.getPerspectiveTransform(pts1, pts2)
+        dst = cv2.warpPerspective(img2, op, (800, 800))
+        cv2.imwrite("Final.jpg", dst)
+
+        name_crop = crop(dst,160,315,489,73)
+        depart_crop = crop(dst,160,415,460,33)
+        year_crop = crop(dst,160,450,520,35)
+        roll_no_crop = crop(dst,245,501,310,34)
+
+        name = pytesseract.image_to_string(name_crop)
+        depart = pytesseract.image_to_string(depart_crop)
+        year = pytesseract.image_to_string(year_crop)
+        roll_no = pytesseract.image_to_string(roll_no_crop)
+
+        if name != '':
+            detection = True
+
+        print("name: ", name)
+        print("depart: ", depart)
+        print("year : ", year)
+        print("roll no : ", roll_no)
+
     except:
-        data = {"text1 ": text, "text2": text1, 'detection': detection}
-        return render(request, "data_view.html", data)
+        pass
 
-        # print(approx)
-
-        # approxx=mapp(approx) #find endpoints of the sheet
-
-        # pts=np.float32([[0,0],[800,0],[800,800],[0,800]])  #map to 800*800 target window
-
-        # op=cv2.getPerspectiveTransform(approxx,pts)  #get the top or bird eye view effect
-        # dst=cv2.warpPerspective(orig,op,(800,800))
-        # print(target)
-
-    pts1 = np.float32([approx[0], approx[3], approx[1], approx[2]])
-    pts2 = np.float32([[0, 0], [800, 0], [0, 800], [800, 800]])
-    # print(approx[1])
-    op = cv2.getPerspectiveTransform(pts1, pts2)
-    dst = cv2.warpPerspective(img2, op, (800, 800))
-    # cv2.imshow("Final",dst)
-    # cv2.waitKey(0)
-    cv2.imwrite("Final.jpg", dst)
-    y = 287
-    x = 148
-    w = 489
-    h = 73
-    crop1 = dst[y:y + h, x:x + w]
-    # cv2.imshow("cropped", crop)
-    # cv2.waitKey(0)
-    x = 152
-    y = 424
-    w = 489
-    h = 66
-    crop2 = dst[y:y + h, x:x + w]
-    # cv2.imshow("Department" , Depart )
-    # cv2.waitKey(0)
-    x = 276
-    y = 713
-    w = 117
-    h = 32
-    crop3 = dst[y:y + h, x:x + w]
-
-    # cv2.imshow("Enrollment",Enrol)
-    # cv2.waitKey(0)
-
-    text1 = pytesseract.image_to_string(crop1)
-    text2 = pytesseract.image_to_string(crop2)
-    text3 = pytesseract.image_to_string(crop3)
-
-    if text1 !='' :
-        detection=True
-
-    print("text1: ", text1)
-    print("text2: ", text2)
-    print("text3: ", text3)
-
-    ## accessing google shee
     ## accessing google sheet ##
     phone,roll_no,year ,domain= '','','',''
-
-    student_name = text1
-
     data = sheet.get_all_records()
     for i in data:
-        if i['name'] == student_name:
+        if i['name'] == name:
             phone = i['phone']
             roll_no = i['roll_no']
             year = i['year']
             domain = i['domain']
 
-    for i in [phone,roll_no,year,domain]:
-        if i=='':
-            i = 'No data found'
-
-    dictionary = {"student_name": student_name,'phone':phone,'roll_no':roll_no,'year':year,'domain':domain,'detection':detection}
-
+    dictionary = {"student_name": name,'phone':phone,'roll_no':roll_no,'year':year,'domain':domain,'detection':detection}
     return render(request,"data_view.html",dictionary)
 
 

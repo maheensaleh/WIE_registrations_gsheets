@@ -37,9 +37,9 @@ while True:
         if cv2.waitKey(1) & 0xFF == ord('t'):
             pic_taken = True
             # _, img2 = video.read()
-            img2 = screen
+            # img2 = screen
             print("pic captured")
-            # img2 = cv2.imread('al.jpeg', 0)
+            img2 = cv2.imread('ma.jpeg', 0)
             pic_taken = True
             sift = cv2.xfeatures2d.SIFT_create()
             kp1, des1 = sift.detectAndCompute(img1, None)
@@ -109,8 +109,8 @@ if cv2.waitKey(0) & 0xFF == ord('q'):
 # w = 489
 # h = 66
 x= 160
-y =415
-h = 33
+y =413
+h = 34
 w = 460
 depart_crop = dst[y:y + h, x:x + w]
 cv2.imshow("Department" , depart_crop )
@@ -133,8 +133,8 @@ if cv2.waitKey(0) & 0xFF == ord('q'):
     cv2.destroyAllWindows()
 
 
-x = 160
-y=504
+x = 245
+y=501
 w = 310
 h = 34
 roll_no_crop = dst[y:y + h, x:x + w]
@@ -154,10 +154,26 @@ roll_no = pytesseract.image_to_string(roll_no_crop)
 if name !='' :
     detection=True
 
+
+try:
+    b = roll_no.index('B')-3
+    roll = roll_no[0:b]
+    batch_code = roll_no[-2::1]
+    h = roll.index("-") + 1
+    complete_rollno = roll[0: h] + batch_code + roll[h:]
+except:
+    pass
+
+
+
 print("name: ", name)
 print("depart: ", depart)
 print("year : ", year)
 print("roll no : ", roll_no)
+print("just roll : ", roll)
+print('batch code : ',batch_code)
+print('complete roll no : ',complete_rollno)
+
 
 # print(len(name))
 # student_name = name
