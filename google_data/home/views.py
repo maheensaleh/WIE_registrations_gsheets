@@ -131,14 +131,29 @@ def data_view(request):
         print("year : ", year)
         print("roll no : ", roll_no)
 
+        try:
+            b = roll_no.index('B') - 3
+            roll = roll_no[0:b]
+            batch_code = roll_no[-2::1]
+            h = roll.index("-") + 1
+            complete_rollno = roll[0: h] + batch_code + roll[h:]
+
+        except:
+            complete_rollno =''
+            pass
+
+
     except:
         pass
 
     ## accessing google sheet ##
+    print("complete roll no : ",complete_rollno)
     phone,roll_no,year ,domain= '','','',''
     data = sheet.get_all_records()
     for i in data:
-        if i['name'] == name:
+        # if i['name'] == name:
+        if i['roll_no'] == complete_rollno:
+
             phone = i['phone']
             roll_no = i['roll_no']
             year = i['year']

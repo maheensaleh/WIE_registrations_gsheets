@@ -39,7 +39,7 @@ while True:
             # _, img2 = video.read()
             # img2 = screen
             print("pic captured")
-            img2 = cv2.imread('ma.jpeg', 0)
+            img2 = cv2.imread('al.jpeg', 0)
             pic_taken = True
             sift = cv2.xfeatures2d.SIFT_create()
             kp1, des1 = sift.detectAndCompute(img1, None)
