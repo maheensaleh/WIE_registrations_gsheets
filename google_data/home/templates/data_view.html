@@ -4,6 +4,8 @@
      color:white ;
   }
 
+
+
 </style>
 
 {%  extends "index.html" %}
@@ -21,6 +23,12 @@
     {% if detection is False %}
       <h1 align="center">Data not found</h1>
   {% endif %}
+
+    <div align="center">
+              <a href="/"> <button id = "goback" type="button" class="btn btn-success" onclick="" style="font-size:20px">Back</button>
+            </a>
+    </div>
+
 
 <!--    <h1 align="center">Your data</h1>-->
 {% endblock content %}

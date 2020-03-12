@@ -153,7 +153,7 @@ def data_view(request):
     for i in data:
         # if i['name'] == name:
         if i['roll_no'] == complete_rollno:
-
+            name = i['name']
             phone = i['phone']
             roll_no = i['roll_no']
             year = i['year']
